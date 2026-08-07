@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from random import randint
-from icecream import ic
 import json
+from random import randint
 
 
 def hex2rgb(hex: str):
@@ -34,23 +33,22 @@ def generate_spectra(col, col_max_count, mz, mz_offset) -> tuple[list, list]:
 
 
 if __name__ == "__main__":
-    colors = dict(
-        R=hex2rgb("#EE161F"),
-        G=hex2rgb("#2DBD0B"),
-        B=hex2rgb("#122BD9"),
-        Y=hex2rgb("#FCD301"),
-        S=hex2rgb("#E3B687"),
-        N=hex2rgb("#AB7D4F"),
-        F=hex2rgb("#8C5E39"),
-        E=hex2rgb("#0F0F0F"),
-        _=hex2rgb("#000000"),
-    )
+    colors = {
+        "R": hex2rgb("#EE161F"),
+        "G": hex2rgb("#2DBD0B"),
+        "B": hex2rgb("#122BD9"),
+        "Y": hex2rgb("#FCD301"),
+        "S": hex2rgb("#E3B687"),
+        "N": hex2rgb("#AB7D4F"),
+        "F": hex2rgb("#8C5E39"),
+        "E": hex2rgb("#0F0F0F"),
+        "_": hex2rgb("#000000"),
+    }
 
     color_spectra = {}
     spec_colors = {}
 
-    for k in colors.keys():
-        col = colors[k]
+    for k, col in colors.items():
         print(f"{k} {col}")
         r, g, b = col
         rs = generate_spectra(r, 10, 20, 0)
@@ -59,8 +57,7 @@ if __name__ == "__main__":
 
         c = rs[0] + gs[0] + bs[0]
         m = rs[1] + gs[1] + bs[1]
-        spec_colors[k] = dict(mz=m, int=c)
-        ic(m, c)
+        spec_colors[k] = {"mz": m, "int": c}
 
     with open("colors.json", "w") as fle:
         json.dump(spec_colors, fle, indent=2)

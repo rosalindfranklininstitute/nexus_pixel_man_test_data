@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from pathlib import Path
 import json
+from pathlib import Path
 
 import numpy as np
 
@@ -30,7 +30,7 @@ class ManData:
                         man_pos.extend([[col, row, mz] for mz in colour_mz])
                         man_int.extend(colour_int)
 
-            self.men.append(dict(pos=np.array(man_pos).T, int=np.array(man_int)))
+            self.men.append({"pos": np.array(man_pos).T, "int": np.array(man_int)})
 
         self.total_pos = self.men[0]["pos"]
         self.total_int = self.men[0]["int"]

@@ -3,17 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from collections import defaultdict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
+
 import numpy as np
 import numpy.typing as npt
-
 from ms_nexus_tools.lib.bounds import Chunk, Shape
 from ms_nexus_tools.lib.data_source import (
     AbstractDataSource,
     Axis,
-    MultiCOO,
-    DataShape,
     AxisType,
+    DataShape,
+    MultiCOO,
     UnknownAxisError,
 )
 
@@ -37,11 +38,11 @@ class Man2DDataSource(AbstractDataSource):
         for k, v in binning.items():
             self.binning[k] = v
         self.man_data = man_data
-        self.axes: dict[str, Axis] = dict(
-            x=Axis("x", 0, AxisType.EXACT, np.float32, "m"),
-            y=Axis("y", 1, AxisType.EXACT, np.float32, "m"),
-            mz=Axis("mz", 2, AxisType.EXACT, np.float32, "mz"),
-        )
+        self.axes: dict[str, Axis] = {
+            "x": Axis("x", 0, AxisType.EXACT, np.float32, "m"),
+            "y": Axis("y", 1, AxisType.EXACT, np.float32, "m"),
+            "mz": Axis("mz", 2, AxisType.EXACT, np.float32, "mz"),
+        }
         for axis in supplimentary_axes:
             self.axes[axis.name] = axis
 
@@ -104,7 +105,7 @@ class Man2DDataSource(AbstractDataSource):
         'images':   (1,1,2) -> (32,32,1)
         'spectra':  (2,2,1) -> (1,1,184000)
         """
-        return dict(images=(1, 1, 2), spectra=(2, 2, 1))
+        return {"images": (1, 1, 2), "spectra": (2, 2, 1)}
 
     def chunk_read_count(self, memory_chunk: Shape) -> int:
         """Returns the number of read operations needed to fill the provided memory chunk."""
@@ -163,7 +164,7 @@ class Man2DDataSource(AbstractDataSource):
         'total_images':     ('mz') # Accumulate over the spectra
         'total_spectra':    ('x','y') # Accumulate over the images
         """
-        return dict(total_image=("mz",), total_spectra=("x", "y"))
+        return {"total_image": ("mz",), "total_spectra": ("x", "y")}
 
     def fill_chunk(
         self,
@@ -191,8 +192,6 @@ class Man2DDataSource(AbstractDataSource):
         """
         if self.any_sparse:
             mask = np.full((self.man_data.total_int.shape[0],), True)
-
-            ic(memory_chunk)
 
             pos = np.array(
                 [

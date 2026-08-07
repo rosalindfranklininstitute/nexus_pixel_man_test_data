@@ -2,5 +2,5 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .data_source_2d import Man2DDataSource
-from .data import ManData
+from .data import ManData as ManData
+from .data_source_2d import Man2DDataSource as Man2DDataSource
