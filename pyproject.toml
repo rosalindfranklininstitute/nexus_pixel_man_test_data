@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Duncan McDougall <duncan.mcdougall@rfi.ac.uk>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[project]
+name = "nexus-pixel-man-test-data"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "McDougall", email = "Duncan.McDougall@rfi.ac.uk" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "ms-nexus-tools",
+    "argsui",
+    "pyimzml",
+    "numpy>=2.4.6",
+]
+
+license = "Apache-2.0"
+license-files = ["LICENSES/*"]
+
+[dependency-groups]
+dev = [
+ "line-profiler>=5.0.2",
+]
+
+[project.scripts]
+nexus-pixel-man-test-data = "nexus_pixel_man_test_data:main"
+
+[build-system]
+requires = ["uv_build>=0.10.11,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+ms-nexus-tools = { path = "../ms-nexus-tools", editable = true }
+argsui = { path = "../argsui", editable = true }
+pyimzml = { path = "../pyimzML", editable = true }
