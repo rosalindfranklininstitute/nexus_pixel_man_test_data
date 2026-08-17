@@ -37,3 +37,6 @@ build-backend = "uv_build"
 ms-nexus-tools = { path = "../ms-nexus-tools", editable = true }
 argsui = { path = "../argsui", editable = true }
 pyimzml = { path = "../pyimzML", editable = true }
+
+[tool.typos.default.extend-identifiers]
+fle = 'fle'

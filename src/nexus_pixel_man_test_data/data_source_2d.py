@@ -4,7 +4,8 @@
 
 from collections import defaultdict
 from collections.abc import Callable
-from datetime import datetime as dt, UTC
+from datetime import UTC
+from datetime import datetime as dt
 from typing import Any
 
 import numpy as np
@@ -26,12 +27,12 @@ class Man2DDataSource(AbstractDataSource):
     def __init__(
         self,
         man_data: ManData,
-        supplimentary_axes: list[Axis] = [],
+        supplementary_axes: list[Axis] = [],
         multipliers: dict[str, float] = {},
         binning: dict[str, float] = {},
         force_sparse: bool = False,
-        instrument_supplimentary_metadata: dict[str, Any] = {},
-        experiment_supplimentary_metadata: dict[str, Any] = {},
+        instrument_supplementary_metadata: dict[str, Any] = {},
+        experiment_supplementary_metadata: dict[str, Any] = {},
     ):
 
         self.multipliers: defaultdict[str, float] = defaultdict(lambda: 1.0)
@@ -46,22 +47,22 @@ class Man2DDataSource(AbstractDataSource):
             "y": Axis("y", 1, AxisType.EXACT, np.float32, "m"),
             "mz": Axis("mz", 2, AxisType.EXACT, np.float32, "mz"),
         }
-        for axis in supplimentary_axes:
+        for axis in supplementary_axes:
             self.axes[axis.name] = axis
 
-        self.instrument_supplimentary_metadata = {
+        self.instrument_supplementary_metadata = {
             "description": "NeXus pixel men tests data.",
             "name": "Pixel Men Test Data",
         }
-        self.instrument_supplimentary_metadata.update(instrument_supplimentary_metadata)
+        self.instrument_supplementary_metadata.update(instrument_supplementary_metadata)
 
         timezone = dt.now(UTC).astimezone().tzinfo
 
-        self.experiment_supplimentary_metadata = {
+        self.experiment_supplementary_metadata = {
             "force_sparse": force_sparse,
             "date": dt.now(timezone).isoformat(),
         }
-        self.experiment_supplimentary_metadata.update(experiment_supplimentary_metadata)
+        self.experiment_supplementary_metadata.update(experiment_supplementary_metadata)
 
         self.axis_order: list[str] = []
         axis_primary: list[int] = []
@@ -96,11 +97,11 @@ class Man2DDataSource(AbstractDataSource):
 
     def instrument_metadata(self) -> dict[str, Any]:
         """Returns a dictionary of values that will be stored as the instrument metadata."""
-        return self.instrument_supplimentary_metadata
+        return self.instrument_supplementary_metadata
 
     def experiment_metadata(self) -> dict[str, Any]:
         """Returns a dictionary of values that will be stored as the experiment metadata."""
-        return self.experiment_supplimentary_metadata
+        return self.experiment_supplementary_metadata
 
     def shape(self) -> DataShape:
         """Return the shape of the data."""
@@ -117,7 +118,7 @@ class Man2DDataSource(AbstractDataSource):
     def output_chunks(self) -> dict[str, Shape]:
         """
         Returns the names and chunking priorities of the desired output array.
-        For examlpe simple image data (x,y, spectra) with shape (32,32,184000)
+        For example simple image data (x,y, spectra) with shape (32,32,184000)
         might produce:
         'images':   (1,1,2) -> (32,32,1)
         'spectra':  (2,2,1) -> (1,1,184000)
@@ -131,7 +132,7 @@ class Man2DDataSource(AbstractDataSource):
     def axis_definitions(self) -> list[Axis]:
         """
         Returns the axis that should be used when storing the data.
-        For examlpe simple image data (x,y, spectra):
+        For example simple image data (x,y, spectra):
         axis(0) : Axis('x', 0, [], CONTINUOUS, 'um')
         axis(1) : Axis('y', 1, [], CONTINUOUS, 'um')
         If is it continuous:
@@ -156,7 +157,7 @@ class Man2DDataSource(AbstractDataSource):
     def binned_axis_edges(self, axis: Axis) -> np.ndarray:
         """
         Returns the bin edges used to histogram the given sparse axis.
-        This is used for generting the output accumulations accros this axis, if required.
+        This is used for generating the output accumulations across this axis, if required.
         """
         if axis.name not in self.axes:
             raise UnknownAxisError(axis.name)
@@ -176,7 +177,7 @@ class Man2DDataSource(AbstractDataSource):
         """
         Returns the names and lists of axis that should be
         accumulated (summed and max).
-        For examlpe simple image data (x,y, spectra):
+        For example simple image data (x,y, spectra):
         might produce:
         'total_images':     ('mz') # Accumulate over the spectra
         'total_spectra':    ('x','y') # Accumulate over the images

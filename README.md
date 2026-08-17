@@ -18,7 +18,7 @@ This was downloaded from [png tree](https://ms.pngtree.com/freepng/8-bit-vector-
 
 To recreate this a "spectrum" was generated for each component of each colour, such that the sum of the intensities within a particular range gives the red green and blue values for a particular pixel.
 
-In the 2D version of the data (`Man2DDataSourse`), the data is presented as an 8x8 grid with spectra: (x,y,mz). Each man take a potion of the spectra.
+In the 2D version of the data (`Man2DDataSource`), the data is presented as an 8x8 grid with spectra: (x,y,mz). Each man take a potion of the spectra.
 That is, if you sum all the intensities over all the X and Y values with mz between 0 and 60 you will recover man 1, between 61 and 120 man2, and so on.
 
 ## Data 
