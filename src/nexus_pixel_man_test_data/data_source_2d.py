@@ -10,8 +10,8 @@ from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-from ms_nexus_tools.lib.bounds import Chunk, Shape
-from ms_nexus_tools.lib.data_source import (
+from xartus.lib.bounds import Chunk, Shape
+from xartus.lib.data_source import (
     AbstractDataSource,
     Axis,
     AxisType,
