@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 from collections.abc import Callable
+from datetime import datetime as dt, UTC
 from typing import Any
 
 import numpy as np
@@ -29,6 +30,8 @@ class Man2DDataSource(AbstractDataSource):
         multipliers: dict[str, float] = {},
         binning: dict[str, float] = {},
         force_sparse: bool = False,
+        instrument_supplimentary_metadata: dict[str, Any] = {},
+        experiment_supplimentary_metadata: dict[str, Any] = {},
     ):
 
         self.multipliers: defaultdict[str, float] = defaultdict(lambda: 1.0)
@@ -45,6 +48,20 @@ class Man2DDataSource(AbstractDataSource):
         }
         for axis in supplimentary_axes:
             self.axes[axis.name] = axis
+
+        self.instrument_supplimentary_metadata = {
+            "description": "NeXus pixel men tests data.",
+            "name": "Pixel Men Test Data",
+        }
+        self.instrument_supplimentary_metadata.update(instrument_supplimentary_metadata)
+
+        timezone = dt.now(UTC).astimezone().tzinfo
+
+        self.experiment_supplimentary_metadata = {
+            "force_sparse": force_sparse,
+            "date": dt.now(timezone).isoformat(),
+        }
+        self.experiment_supplimentary_metadata.update(experiment_supplimentary_metadata)
 
         self.axis_order: list[str] = []
         axis_primary: list[int] = []
@@ -77,13 +94,13 @@ class Man2DDataSource(AbstractDataSource):
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
-    def instrament_metadata(self) -> dict[str, Any]:
-        """Returns a dictionary of values that will be stored as the instrament metadata."""
-        return {}
+    def instrument_metadata(self) -> dict[str, Any]:
+        """Returns a dictionary of values that will be stored as the instrument metadata."""
+        return self.instrument_supplimentary_metadata
 
     def experiment_metadata(self) -> dict[str, Any]:
         """Returns a dictionary of values that will be stored as the experiment metadata."""
-        return {}
+        return self.experiment_supplimentary_metadata
 
     def shape(self) -> DataShape:
         """Return the shape of the data."""
