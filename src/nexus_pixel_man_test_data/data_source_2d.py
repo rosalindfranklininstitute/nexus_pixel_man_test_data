@@ -13,6 +13,7 @@ import numpy.typing as npt
 from xartus.lib.bounds import Chunk, Shape
 from xartus.lib.data_source import (
     AbstractDataSource,
+    Signal,
     Axis,
     AxisType,
     DataShape,
@@ -111,9 +112,9 @@ class Man2DDataSource(AbstractDataSource):
             worst_case_density=self.man_data.density,
         )
 
-    def signal_type(self) -> npt.DTypeLike:
+    def signal_definition(self) -> Signal:
         """Returns the type for data."""
-        return np.int16
+        return Signal(name="signal", dtype=np.int16, units="count")
 
     def output_chunks(self) -> dict[str, Shape]:
         """

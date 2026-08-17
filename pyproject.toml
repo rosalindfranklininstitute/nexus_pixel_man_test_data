@@ -24,6 +24,8 @@ license-files = ["LICENSES/*"]
 [dependency-groups]
 dev = [
  "line-profiler>=5.0.2",
+ "pytest>=9.1.1",
+ "pytest-cov>=7.1.0",
 ]
 
 [project.scripts]
@@ -40,3 +42,12 @@ pyimzml = { path = "../pyimzML", editable = true }
 
 [tool.typos.default.extend-identifiers]
 fle = 'fle'
+
+[tool.pytest]
+testpaths = ["./tests", "./src/"]
+addopts = [
+    "--doctest-modules", 
+    "--cov=./src/", 
+    "--cov-report=html", 
+    "--cov-branch",
+]
