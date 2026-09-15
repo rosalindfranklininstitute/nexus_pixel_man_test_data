@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
         c = rs[0] + gs[0] + bs[0]
         m = rs[1] + gs[1] + bs[1]
-        spec_colors[k] = {"mz": m, "int": c}
+        spec_colors[k] = {"mz": m, "int": c, "color": [r, g, b]}
 
     with open("colors.json", "w") as fle:
         json.dump(spec_colors, fle, indent=2)

@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     { name = "McDougall", email = "Duncan.McDougall@rfi.ac.uk" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "xartus",
     "argsui",
@@ -23,6 +23,7 @@ license-files = ["LICENSES/*"]
 
 [dependency-groups]
 dev = [
+ "icecream>=2.2.0",
  "line-profiler>=5.0.2",
  "pytest>=9.1.1",
  "pytest-cov>=7.1.0",
@@ -37,7 +38,6 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 xartus = { path = "../xartus", editable = true }
-argsui = { path = "../argsui", editable = true }
 pyimzml = { path = "../pyimzML", editable = true }
 
 [tool.typos.default.extend-identifiers]

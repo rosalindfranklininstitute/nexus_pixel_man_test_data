@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Duncan McDougall <duncan.mcdougall@rfi.ac.uk>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from pathlib import Path
 
 import numpy as np
@@ -30,7 +34,6 @@ def test_default_dataset():
         filename.unlink()
 
     process_args = data_convert.ProcessArgs(
-        in_path=man_file,
         out_path=filename,
         chunk_max_byte_count=1024 * 1024,
         memory_max_byte_count=1024 * 1024 * 1024,
@@ -40,41 +43,46 @@ def test_default_dataset():
 
     with h5py.File(filename, "r") as fle:
         for data_name in ["images", "spectra"]:
-            assert f"/entry/{data_name}/data/signal" in fle
+            assert f"/entry/data/{data_name}/signal" in fle
             for axis in man_data_source.axes.values():
-                assert f"/entry/{data_name}/data/{axis.name}" in fle
-                assert fle[f"/entry/{data_name}/data/{axis.name}"].dtype == axis.dtype
-                assert f"{axis.name}_indices" in fle[f"/entry/{data_name}/data/"].attrs
+                assert f"/entry/data/{data_name}/{axis.name}" in fle
+                assert fle[f"/entry/data/{data_name}/{axis.name}"].dtype == axis.dtype
+                assert f"{axis.name}_indices" in fle[f"/entry/data/{data_name}/"].attrs
                 assert (
-                    fle[f"/entry/{data_name}/data"].attrs[f"{axis.name}_indices"]
+                    fle[f"/entry/data/{data_name}"].attrs[f"{axis.name}_indices"]
                     == axis.primary_axis
                 )
 
             assert np.all(
-                fle[f"/entry/{data_name}/data"].attrs["axes"] == ["x", "y", "mz"]
+                fle[f"/entry/data/{data_name}"].attrs["axes"] == ["x", "y", "mz"]
             )
 
             assert (
-                fle[f"/entry/{data_name}/data/signal"].shape
+                fle[f"/entry/data/{data_name}/signal"].shape
                 == man_data_source.man_data.shape
             )
 
             np.testing.assert_allclose(
-                fle[f"/entry/{data_name}/data/signal"][:, :, :],
+                fle[f"/entry/data/{data_name}/signal"][:, :, :],
                 man_data_source.man_data.dense,
             )
 
         total_image = np.sum(man_data_source.man_data.dense, axis=2)
-        assert fle["/entry/total_image/data/signal"].shape == (2, *total_image.shape)
+        assert fle["/entry/accumulations/total_image/signal"].shape == (
+            2,
+            *total_image.shape,
+        )
         np.testing.assert_allclose(
-            fle["/entry/total_image/data/signal"][1, :, :], total_image
+            fle["/entry/accumulations/total_image/signal"][0, :, :], total_image
         )
 
         total_spectra = np.sum(man_data_source.man_data.dense, axis=(0, 1))
-        assert fle["/entry/total_spectra/data/signal"].shape == (
+        assert fle["/entry/accumulations/total_spectra/signal"].shape == (
             2,
             *total_spectra.shape,
         )
         np.testing.assert_allclose(
-            fle["/entry/total_spectra/data/signal"][1, :], total_spectra
+            fle["/entry/accumulations/total_spectra/signal"][0, :], total_spectra
         )
+    if filename.exists():
+        filename.unlink()

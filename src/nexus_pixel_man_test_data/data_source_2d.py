@@ -114,7 +114,7 @@ class Man2DDataSource(AbstractDataSource):
 
     def signal_definition(self) -> Signal:
         """Returns the type for data."""
-        return Signal(name="signal", dtype=np.int16, units="count")
+        return Signal(name="signal", dtype=np.int32, units="count")
 
     def output_chunks(self) -> dict[str, Shape]:
         """
@@ -133,13 +133,6 @@ class Man2DDataSource(AbstractDataSource):
     def axis_definitions(self) -> list[Axis]:
         """
         Returns the axis that should be used when storing the data.
-        For example simple image data (x,y, spectra):
-        axis(0) : Axis('x', 0, [], CONTINUOUS, 'um')
-        axis(1) : Axis('y', 1, [], CONTINUOUS, 'um')
-        If is it continuous:
-        axis(2) : Axis('mz', 2, [], CONTINUOUS, 'mz')
-        if it is only peaks:
-        axis(2) : Axis('mz', 2, [0,1], SPARSE, 'mz')
         """
         return [self.axes[ax_name] for ax_name in self.axis_order]
 
