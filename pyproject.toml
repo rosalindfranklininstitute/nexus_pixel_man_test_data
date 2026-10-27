@@ -14,7 +14,6 @@ requires-python = ">=3.13"
 dependencies = [
     "xartus",
     "argsui",
-    "pyimzml",
     "numpy>=2.4.6",
 ]
 
@@ -38,7 +37,6 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 xartus = { path = "../xartus", editable = true }
-pyimzml = { path = "../pyimzML", editable = true }
 
 [tool.typos.default.extend-identifiers]
 fle = 'fle'

@@ -9,7 +9,7 @@ import h5py
 
 from xartus.lib.chunker import count_chunks_to_cover
 from xartus.api import data_convert
-from xartus.lib.data_source import Axis, AxisType
+from xartus.lib.data_source import Axis
 from nexus_pixel_man_test_data import Man2DDataSource, ManData, data_files
 
 
@@ -24,8 +24,8 @@ def test_default_dataset():
     man_data_source = Man2DDataSource(
         man_data,
         supplementary_axes=[
-            Axis("time", 0, AxisType.EXACT, np.float32, "s"),
-            Axis("error", 2, AxisType.EXACT, np.float32, ""),
+            Axis("time", 0, np.float32, "s"),
+            Axis("error", 2, np.float32, ""),
         ],
         multipliers=dict(x=0.1, y=0.1, mz=0.1, time=1.0, error=1.0),
     )

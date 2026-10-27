@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -533,7 +533,6 @@ source = { editable = "." }
 dependencies = [
     { name = "argsui" },
     { name = "numpy" },
-    { name = "pyimzml" },
     { name = "xartus" },
 ]
 
@@ -549,7 +548,6 @@ dev = [
 requires-dist = [
     { name = "argsui" },
     { name = "numpy", specifier = ">=2.4.6" },
-    { name = "pyimzml", editable = "../pyimzML" },
     { name = "xartus", editable = "../xartus" },
 ]
 
@@ -775,21 +773,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pyimzml"
-version = "1.5.5"
-source = { editable = "../pyimzML" }
-dependencies = [
-    { name = "numpy" },
-    { name = "wheezy-template" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "numpy" },
-    { name = "wheezy-template" },
-]
-
-[[package]]
 name = "pyparsing"
 version = "3.3.2"
 source = { registry = "https://pypi.org/simple" }
@@ -998,12 +981,6 @@ wheels = [
 ]
 
 [[package]]
-name = "wheezy-template"
-version = "3.2.5"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/43/1d/b4fb6ee3f6a0af54ac26e0425b7947bd7d9ed786a75ca173a40640c25bc6/wheezy_template-3.2.5.tar.gz", hash = "sha256:c7c0bf85af0f70ca2ef4b6ea9a74ef372f73392aa17bea0d885dcba7356d0867", size = 19324, upload-time = "2026-02-18T09:05:21.933Z" }
-
-[[package]]
 name = "xarray"
 version = "2026.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1019,7 +996,7 @@ wheels = [
 
 [[package]]
 name = "xartus"
-version = "0.4.2"
+version = "0.4.3"
 source = { editable = "../xartus" }
 dependencies = [
     { name = "argsui" },

@@ -11,15 +11,15 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from xartus.lib.bounds import Chunk, Shape
+from xartus.lib.multi_coo import MultiCOO
 from xartus.lib.data_source import (
     AbstractDataSource,
     Signal,
     Axis,
-    AxisType,
     DataShape,
-    MultiCOO,
     UnknownAxisError,
 )
+from xartus.lib.writers import SumAndMax, AbstractWriter
 
 from .data import ManData
 
@@ -44,9 +44,9 @@ class Man2DDataSource(AbstractDataSource):
             self.binning[k] = v
         self.man_data = man_data
         self.axes: dict[str, Axis] = {
-            "x": Axis("x", 0, AxisType.EXACT, np.float32, "m"),
-            "y": Axis("y", 1, AxisType.EXACT, np.float32, "m"),
-            "mz": Axis("mz", 2, AxisType.EXACT, np.float32, "mz"),
+            "x": Axis("x", 0, np.float32, "m"),
+            "y": Axis("y", 1, np.float32, "m"),
+            "mz": Axis("mz", 2, np.float32, "mz"),
         }
         for axis in supplementary_axes:
             self.axes[axis.name] = axis
@@ -67,26 +67,21 @@ class Man2DDataSource(AbstractDataSource):
 
         self.axis_order: list[str] = []
         axis_primary: list[int] = []
-        self.any_sparse = force_sparse
+        self.forse_sparse = force_sparse
         for key, axis in self.axes.items():
             assert key == axis.name
             axis_primary.append(axis.primary_axis)
             self.axis_order.append(axis.name)
-            self.any_sparse |= axis.axis_type == AxisType.BINNED
         order = np.argsort(axis_primary)
         self.axis_order = [self.axis_order[oo] for oo in order]
 
-        self.axis_values = [np.array([])] * 3
+        self.axes_values = [np.array([])] * 3
         self.axis_names = [""] * 3
         shape = [0, 0, 0]
         for ax in self.axes.values():
             if shape[ax.primary_axis] == 0:
-                if ax.axis_type == AxisType.BINNED:
-                    self.axis_values[ax.primary_axis] = self.binned_axis_edges(ax)
-                    shape[ax.primary_axis] = len(self.axis_values[ax.primary_axis]) - 1
-                else:
-                    self.axis_values[ax.primary_axis] = self.exact_axis_values(ax)
-                    shape[ax.primary_axis] = len(self.axis_values[ax.primary_axis])
+                self.axes_values[ax.primary_axis] = self.axis_values(ax)
+                shape[ax.primary_axis] = len(self.axes_values[ax.primary_axis])
                 self.axis_names[ax.primary_axis] = ax.name
         self.total_shape = Shape(shape)
 
@@ -100,6 +95,10 @@ class Man2DDataSource(AbstractDataSource):
         """Returns a dictionary of values that will be stored as the instrument metadata."""
         return self.instrument_supplementary_metadata
 
+    def user_metadata(self) -> dict[str, Any]:
+        """Returns a dictionary of values that will be stored as the instrument metadata."""
+        return {}
+
     def experiment_metadata(self) -> dict[str, Any]:
         """Returns a dictionary of values that will be stored as the experiment metadata."""
         return self.experiment_supplementary_metadata
@@ -108,7 +107,6 @@ class Man2DDataSource(AbstractDataSource):
         """Return the shape of the data."""
         return DataShape(
             self.total_shape,
-            is_sparse=self.any_sparse,
             worst_case_density=self.man_data.density,
         )
 
@@ -116,7 +114,7 @@ class Man2DDataSource(AbstractDataSource):
         """Returns the type for data."""
         return Signal(name="signal", dtype=np.int32, units="count")
 
-    def output_chunks(self) -> dict[str, Shape]:
+    def output_chunk_priorities(self) -> dict[str, Shape]:
         """
         Returns the names and chunking priorities of the desired output array.
         For example simple image data (x,y, spectra) with shape (32,32,184000)
@@ -136,38 +134,17 @@ class Man2DDataSource(AbstractDataSource):
         """
         return [self.axes[ax_name] for ax_name in self.axis_order]
 
-    def exact_axis_values(self, axis: Axis) -> np.ndarray:
+    def axis_values(self, axis: Axis) -> np.ndarray:
         """Returns the values for the specified exact axis."""
         if axis.name not in self.axes:
             raise UnknownAxisError(axis.name)
-        if self.axes[axis.name].axis_type != AxisType.EXACT:
-            raise UnknownAxisError(axis.name, AxisType.EXACT)
         return np.astype(
             np.arange(self.man_data.shape[axis.primary_axis])
             * self.multipliers[axis.name],
             axis.dtype,
         )
 
-    def binned_axis_edges(self, axis: Axis) -> np.ndarray:
-        """
-        Returns the bin edges used to histogram the given sparse axis.
-        This is used for generating the output accumulations across this axis, if required.
-        """
-        if axis.name not in self.axes:
-            raise UnknownAxisError(axis.name)
-        if self.axes[axis.name].axis_type != AxisType.BINNED:
-            raise UnknownAxisError(axis.name, AxisType.BINNED)
-        return np.astype(
-            np.arange(
-                0,
-                self.man_data.shape[axis.primary_axis] + self.binning[axis.name],
-                self.binning[axis.name],
-            )
-            * self.multipliers[axis.name],
-            axis.dtype,
-        )
-
-    def output_accumulations(self) -> dict[str, tuple[str, ...]]:
+    def output_accumulations(self) -> list[AbstractWriter]:
         """
         Returns the names and lists of axis that should be
         accumulated (summed and max).
@@ -176,7 +153,11 @@ class Man2DDataSource(AbstractDataSource):
         'total_images':     ('mz') # Accumulate over the spectra
         'total_spectra':    ('x','y') # Accumulate over the images
         """
-        return {"total_image": ("mz",), "total_spectra": ("x", "y")}
+
+        return [
+            SumAndMax(name="total_image", axes=["mz"]),
+            SumAndMax(name="total_spectra", axes=["x", "y"]),
+        ]
 
     def fill_chunk(
         self,
@@ -202,7 +183,8 @@ class Man2DDataSource(AbstractDataSource):
         -> return_data.shape[0:-1] == self.shape() and return_data.shape[-1] = len(fill_axis)+1
 
         """
-        if self.any_sparse:
+
+        if self.forse_sparse:
             mask = np.full((self.man_data.total_int.shape[0],), True)
 
             pos = np.array(
@@ -218,11 +200,7 @@ class Man2DDataSource(AbstractDataSource):
                 mask &= pos[ii, :] >= memory_chunk[ii].start
                 mask &= pos[ii, :] < memory_chunk[ii].stop
 
-            values = {
-                ax.name: self.binned_axis_edges(ax)[pos[ax.primary_axis, mask] + 1]
-                for ax in self.axes.values()
-                if ax.axis_type == AxisType.BINNED
-            }
+            values = {}
             values["signal"] = self.man_data.total_int[mask]
 
             return MultiCOO(pos[:, mask], values)
