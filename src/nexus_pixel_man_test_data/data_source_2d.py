@@ -9,7 +9,6 @@ from datetime import datetime as dt
 from typing import Any
 
 import numpy as np
-import numpy.typing as npt
 from xartus.lib.bounds import Chunk, Shape
 from xartus.lib.multi_coo import MultiCOO
 from xartus.lib.data_source import (
@@ -33,15 +32,19 @@ class Man2DDataSource(AbstractDataSource):
         binning: dict[str, float] = {},
         force_sparse: bool = False,
         instrument_supplementary_metadata: dict[str, Any] = {},
+        user_supplementary_metadata: dict[str, Any] = {},
         experiment_supplementary_metadata: dict[str, Any] = {},
+        extra_accumulations: list[AbstractWriter] = [],
     ):
 
         self.multipliers: defaultdict[str, float] = defaultdict(lambda: 1.0)
         for k, v in multipliers.items():
             self.multipliers[k] = v
         self.binning: defaultdict[str, float] = defaultdict(lambda: 1.0)
+        self.forse_sparse = force_sparse
         for k, v in binning.items():
             self.binning[k] = v
+            self.forse_sparse = True
         self.man_data = man_data
         self.axes: dict[str, Axis] = {
             "x": Axis("x", 0, np.float32, "m"),
@@ -57,6 +60,8 @@ class Man2DDataSource(AbstractDataSource):
         }
         self.instrument_supplementary_metadata.update(instrument_supplementary_metadata)
 
+        self.user_supplementary_metadata = user_supplementary_metadata
+
         timezone = dt.now(UTC).astimezone().tzinfo
 
         self.experiment_supplementary_metadata = {
@@ -65,9 +70,10 @@ class Man2DDataSource(AbstractDataSource):
         }
         self.experiment_supplementary_metadata.update(experiment_supplementary_metadata)
 
+        self.extra_accumulations = extra_accumulations
+
         self.axis_order: list[str] = []
         axis_primary: list[int] = []
-        self.forse_sparse = force_sparse
         for key, axis in self.axes.items():
             assert key == axis.name
             axis_primary.append(axis.primary_axis)
@@ -97,7 +103,7 @@ class Man2DDataSource(AbstractDataSource):
 
     def user_metadata(self) -> dict[str, Any]:
         """Returns a dictionary of values that will be stored as the instrument metadata."""
-        return {}
+        return self.user_supplementary_metadata
 
     def experiment_metadata(self) -> dict[str, Any]:
         """Returns a dictionary of values that will be stored as the experiment metadata."""
@@ -157,6 +163,7 @@ class Man2DDataSource(AbstractDataSource):
         return [
             SumAndMax(name="total_image", axes=["mz"]),
             SumAndMax(name="total_spectra", axes=["x", "y"]),
+            *self.extra_accumulations,
         ]
 
     def fill_chunk(
