@@ -12,9 +12,9 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "xartus",
-    "argsui",
+    "argsui>=0.3.6",
     "numpy>=2.4.6",
+    "xartus>=0.5.1",
 ]
 
 license = "Apache-2.0"
@@ -34,9 +34,6 @@ nexus-pixel-man-test-data = "nexus_pixel_man_test_data:main"
 [build-system]
 requires = ["uv_build>=0.10.11,<0.11.0"]
 build-backend = "uv_build"
-
-[tool.uv.sources]
-xartus = { path = "../xartus", editable = true }
 
 [tool.typos.default.extend-identifiers]
 fle = 'fle'
